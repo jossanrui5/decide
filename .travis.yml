@@ -5,8 +5,9 @@ services:
 addons:
   postgresql: "9.4"
 before_script:
-  - psql -U postgres -c "create user decide password 'decide'"
-  - psql -U postgres -c "create database test_decide owner decide"
+  - cp local_settings.travis.py local_settings.py
+  - psql -c "create user decide with password 'decide'" 
+  - psql -c "create database decidedb owner decide"
   - psql -U postgres -c "ALTER USER decide CREATEDB"
 language: python
 python:
@@ -19,3 +20,11 @@ script:
   - coverage run --branch --source=. ./manage.py test --keepdb --with-xunit
   - coverage xml
   - python-codacy-coverage -r coverage.xml
+
+deploy:
+  provider: heroku
+  app: egcpruebadecide
+  strategy: git
+  api_key: $HEROKU_AUTH_TOKEN
+
+if: branch = master 
